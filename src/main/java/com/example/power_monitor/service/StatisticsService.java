@@ -4,6 +4,7 @@ package com.example.power_monitor.service;
 import com.example.power_monitor.model.HouseStatistics;
 import com.example.power_monitor.model.PowerConsumption;
 import com.example.power_monitor.repository.CsvDataRepository;
+import com.example.power_monitor.repository.TrinoDataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StatisticsService {
 
-    private final CsvDataRepository csvDataRepository;
+//    private final CsvDataRepository csvDataRepository;
+    private final TrinoDataRepository csvDataRepository;
 
     // Average electricity rate (USD per kWh) - adjust as needed
     private static final double ELECTRICITY_RATE = 0.12;
