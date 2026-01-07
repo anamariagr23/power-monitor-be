@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Slf4j
@@ -26,6 +28,29 @@ public class HistoricalDataService {
 
         return new HistoricalDataResponse(
                 date,
+                data.size(),
+                data
+        );
+    }
+
+    /**
+     * Get historical data for a specific hour.
+     * Returns 1 hour of data with 1-minute intervals.
+     *
+     * @param dateTime The datetime (minute will be truncated to :00)
+     * @return HistoricalDataResponse containing up to 60 records
+     */
+    public HistoricalDataResponse getDataForHour(LocalDateTime dateTime) {
+        // Truncate to hour
+        LocalDateTime truncated = dateTime.truncatedTo(ChronoUnit.HOURS);
+        log.info("Fetching historical data for hour: {} (truncated from {})", truncated, dateTime);
+
+        List<PowerConsumption> data = trinoDataRepository.getDataForHour(truncated);
+
+        log.info("Found {} records for hour: {}", data.size(), truncated);
+
+        return new HistoricalDataResponse(
+                truncated.toLocalDate(),
                 data.size(),
                 data
         );

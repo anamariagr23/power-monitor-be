@@ -28,7 +28,7 @@ public class CassandraTrinoRepository {
     }
 
     private final RowMapper<PowerConsumption> powerMapper = (rs, rowNum) -> PowerConsumption.builder()
-            .timestamp(rs.getTimestamp("timestamp").toInstant())
+            .timestamp(rs.getTimestamp("ts").toInstant())
             .globalActivePower(getDoubleOrNull(rs, "global_active_power"))
             .globalReactivePower(getDoubleOrNull(rs, "global_reactive_power"))
             .voltage(getDoubleOrNull(rs, "voltage"))
@@ -62,7 +62,7 @@ public class CassandraTrinoRepository {
         // Note: Uses fully qualified table name with cassandra catalog
         String sql = """
             SELECT
-                "timestamp",
+                ts,
                 global_active_power,
                 global_reactive_power,
                 voltage,
@@ -71,7 +71,7 @@ public class CassandraTrinoRepository {
                 sub_metering_2,
                 sub_metering_3
             FROM cassandra.energy.events_by_hour
-            ORDER BY "timestamp" DESC
+            ORDER BY ts DESC
             LIMIT ?
         """;
 
@@ -97,7 +97,7 @@ public class CassandraTrinoRepository {
 
         String sql = """
             SELECT
-                "timestamp",
+                ts,
                 global_active_power,
                 global_reactive_power,
                 voltage,
@@ -106,8 +106,8 @@ public class CassandraTrinoRepository {
                 sub_metering_2,
                 sub_metering_3
             FROM cassandra.energy.events_by_hour
-            WHERE "timestamp" >= ? AND "timestamp" < ?
-            ORDER BY "timestamp"
+            WHERE ts >= ? AND ts < ?
+            ORDER BY ts
         """;
 
         try {

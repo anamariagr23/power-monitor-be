@@ -83,6 +83,45 @@ public class TrinoDataRepository {
         );
     }
 
+    /**
+     * Get historical data for a specific hour on a given date.
+     * Returns 1 hour of data with 1-minute intervals (up to 60 records).
+     *
+     * @param dateTimeUtc The start of the hour (minute should be 00)
+     * @return List of PowerConsumption records for that hour
+     */
+    public List<PowerConsumption> getDataForHour(java.time.LocalDateTime dateTimeUtc) {
+        // Truncate to hour to ensure we start at :00
+        java.time.LocalDateTime truncated = dateTimeUtc.truncatedTo(java.time.temporal.ChronoUnit.HOURS);
+        Instant start = truncated.toInstant(ZoneOffset.UTC);
+        Instant end = truncated.plusHours(1).toInstant(ZoneOffset.UTC);
+
+        log.info("Fetching historical data for hour: {} to {}", start, end);
+
+        String sql = """
+            SELECT
+              "timestamp" AS timestamp,
+              global_active_power,
+              global_reactive_power,
+              voltage,
+              global_intensity,
+              sub_metering_1,
+              sub_metering_2,
+              sub_metering_3
+            FROM events_training
+            WHERE "timestamp" >= ? AND "timestamp" < ?
+                AND global_active_power IS NOT NULL
+            ORDER BY "timestamp"
+        """;
+
+        return jdbcTemplate.query(
+                sql,
+                powerMapper,
+                Timestamp.from(start),
+                Timestamp.from(end)
+        );
+    }
+
     public List<PowerConsumption> getDataInRange(LocalDate startDateUtc, LocalDate endDateUtcInclusive) {
         Instant start = startDateUtc.atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant endExclusive = endDateUtcInclusive.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
